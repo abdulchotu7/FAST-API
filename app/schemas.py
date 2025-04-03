@@ -16,13 +16,6 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-    @field_validator('password')
-    @classmethod
-    def validate_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        return v
-
 class AdminCreate(UserCreate):
     admin_key: str
 
@@ -46,7 +39,6 @@ class Movie(MovieBase):
 class BookingBase(BaseModel):
     seats: int
 
-    # Add validation for seats
     @field_validator('seats')
     @classmethod
     def validate_seats(cls, v):

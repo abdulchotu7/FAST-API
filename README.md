@@ -4,7 +4,7 @@ A FastAPI-based movie ticket booking system with user authentication and admin f
 
 ## Features
 
-- **User Authentication**: Secure JWT token-based authentication
+- **User Authentication**: JWT token-based authentication
 - **Movie Management**: Browse available movies with showtimes and available seats
 - **Ticket Booking**: Book tickets for available movies
 - **Booking History**: View past bookings
@@ -15,6 +15,7 @@ A FastAPI-based movie ticket booking system with user authentication and admin f
 
 - Python 3.8 or higher
 - pip (Python package installer)
+- PostgreSQL database (or change DATABASE_URL to use SQLite)
 
 ## Installation
 
@@ -49,12 +50,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-To enable test coverage reporting, install `pytest-cov`:
-
-```bash
-pip install pytest-cov
-```
-
 5. **Set up environment variables**
 
 Copy the example environment file and update it with your settings:
@@ -63,7 +58,21 @@ Copy the example environment file and update it with your settings:
 cp .env.example .env
 ```
 
-Edit the `.env` file to set your own values, especially the `SECRET_KEY` and `ADMIN_PASSWORD`.
+Edit the `.env` file with your database connection string and other settings:
+
+```
+DATABASE_URL=postgresql://username:password@localhost:5432/dbname
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+DEBUG=True
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-admin-password
+```
+
+6. **Database Setup**
+
+The application will automatically create the necessary database tables when it starts. The admin user should already exist in your database.
 
 ## Running the Application
 
@@ -76,21 +85,32 @@ The API will be available at http://localhost:8000
 - API documentation: http://localhost:8000/docs
 - Alternative documentation: http://localhost:8000/redoc
 
+### Using the FastAPI Documentation
+
+1. Open http://localhost:8000/docs in your browser
+2. You'll see all available endpoints with their descriptions
+3. To test protected endpoints:
+   - First, use the `/auth/login` endpoint to get a token
+   - The API will automatically set a cookie with your authentication token
+   - Now you can use other endpoints that require authentication
+4. For admin-only endpoints, you need to login with an admin user
+
 ## API Endpoints
 
 ### Authentication
 - `POST /auth/signup` - Create a new user account
+- `POST /auth/create-admin` - Create an admin account (requires admin_key)
 - `POST /auth/login` - Login and get access token
 - `POST /auth/logout` - Logout (clear cookie)
 - `GET /auth/me` - Get current user info
 
 ### Movies
-- `GET /movies` - View all movies
-- `POST /movies/{movie_id}/book` - Book tickets for a movie
-- `GET /movies/history` - View booking history
+- `GET /movies` - View all movies (requires authentication)
+- `POST /movies/{movie_id}/book` - Book tickets for a movie (requires authentication)
+- `GET /movies/history` - View booking history (requires authentication)
 
 ### Admin Only
-- `POST /admin/movies` - Add a new movie
+- `POST /admin/movies` - Add a new movie (requires admin privileges)
 
 ## Project Structure
 
@@ -137,19 +157,27 @@ Run tests with coverage report:
 python -m pytest --cov=app
 ```
 
+For a more detailed coverage report:
+
+```bash
+python -m pytest --cov=app --cov-report=term-missing
+```
+
 Run specific test categories:
 
 ```bash
 python -m pytest -m auth  # Run authentication tests
 python -m pytest -m critical  # Run critical tests
+python -m pytest -m unit  # Run unit tests with mocks
 ```
 
 ## Security
 
 - All sensitive information is stored in environment variables
-- Passwords are hashed using bcrypt
 - Authentication is handled with JWT tokens
 - CORS is configured to restrict access to specified origins
+- Admin routes are protected with role-based access control
+- Passwords are stored as plain text in the database
 
 ## License
 
