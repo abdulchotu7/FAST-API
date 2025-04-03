@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Sequence
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from .database import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 class User(Base):
     __tablename__ = "users"
@@ -15,7 +15,7 @@ class User(Base):
 class Movie(Base):
     __tablename__ = "movies"
 
-    id = Column(Integer, primary_key=True, index=True) 
+    id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     showtime = Column(DateTime)
     available_seats = Column(Integer)
@@ -27,7 +27,7 @@ class Booking(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     movie_id = Column(Integer, ForeignKey("movies.id"))
-    booking_time = Column(DateTime, default=datetime.utcnow)
+    booking_time = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     seats = Column(Integer)
     user = relationship("User", back_populates="bookings")
     movie = relationship("Movie", back_populates="bookings")

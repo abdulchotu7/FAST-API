@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 from typing import Optional
 
@@ -16,19 +16,20 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v
+
+class AdminCreate(UserCreate):
+    admin_key: str
+
 class User(UserBase):
     id: int
     is_admin: bool
-
-    class Config:
-        orm_mode = True
-
-class CurrentUser(BaseModel):
-    username: str
-    is_admin: bool
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MovieBase(BaseModel):
     title: str
@@ -40,12 +41,18 @@ class MovieCreate(MovieBase):
 
 class Movie(MovieBase):
     id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class BookingBase(BaseModel):
     seats: int
+
+    # Add validation for seats
+    @field_validator('seats')
+    @classmethod
+    def validate_seats(cls, v):
+        if v <= 0:
+            raise ValueError('Number of seats must be positive')
+        return v
 
 class BookingCreate(BookingBase):
     pass
@@ -55,10 +62,4 @@ class Booking(BookingBase):
     user_id: int
     movie_id: int
     booking_time: datetime
-
-    class Config:
-        orm_mode = True
-
-class UserLogin(BaseModel):
-    username: str
-    password: str
+    model_config = ConfigDict(from_attributes=True)
