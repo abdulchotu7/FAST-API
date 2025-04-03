@@ -29,15 +29,10 @@ cd movie-booking-api
 2. **Create a virtual environment**
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 ```
 
 3. **Activate the virtual environment**
-
-- On Windows:
-```bash
-venv\Scripts\activate
-```
 
 - On macOS/Linux:
 ```bash
@@ -58,16 +53,6 @@ Copy the example environment file and update it with your settings:
 cp .env.example .env
 ```
 
-Edit the `.env` file with your database connection string and other settings:
-
-```
-DATABASE_URL=postgresql://username:password@localhost:5432/dbname
-SECRET_KEY=your-secret-key-here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-DEBUG=True
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your-admin-password
 ```
 
 6. **Database Setup**
