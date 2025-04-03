@@ -53,8 +53,6 @@ Copy the example environment file and update it with your settings:
 cp .env.example .env
 ```
 
-```
-
 6. **Database Setup**
 
 The application will automatically create the necessary database tables when it starts. The admin user should already exist in your database.
