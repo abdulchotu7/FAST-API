@@ -15,7 +15,7 @@ async def startup_event():
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "World"}  # Changed to match the test
 
 # Auth routes
 @app.post("/auth/signup", response_model=schemas.User)

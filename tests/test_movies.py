@@ -1,44 +1,73 @@
 from fastapi.testclient import TestClient
-import pytest
+from app.main import app
+from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
+from app.auth import create_access_token
 
-def get_auth_headers(client, username, password):
-    response = client.post(
-        "/auth/login",
-        json={"username": username, "password": password}
-    )
-    token = response.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+client = TestClient(app)
 
-def test_create_movie(client, test_admin):
-    headers = get_auth_headers(client, "admin", "adminpass")
+def get_test_movie():
+    return {
+        "title": "Test Movie",
+        "showtime": (datetime.utcnow() + timedelta(days=1)).isoformat(),
+        "available_seats": 100
+    }
+
+def get_admin_token():
+    return create_access_token({"sub": "admin"}, True)
+
+def test_get_movies():
+    test_movie = get_test_movie()
+    test_movie["id"] = 1  # Add id for response
+    user_token = create_access_token({"sub": "testuser"}, False)
+    
+    with patch('app.database.get_db') as mock_db:
+        mock_session = MagicMock()
+        mock_query = MagicMock()
+        mock_query.all.return_value = [MagicMock(**test_movie)]
+        mock_session.query.return_value = mock_query
+        mock_db.return_value = mock_session
+        
+        response = client.get(
+            "/movies",
+            cookies={"access_token": user_token}
+        )
+        
+    assert response.status_code == 200
+    movies = response.json()
+    assert len(movies) == 1
+    assert movies[0]["title"] == test_movie["title"]
+
+def test_create_movie_admin():
+    test_movie = get_test_movie()
+    admin_token = get_admin_token()
+    
+    with patch('app.database.get_db') as mock_db:
+        mock_session = MagicMock()
+        mock_session.add.return_value = None
+        mock_session.commit.return_value = None
+        mock_session.refresh = lambda x: None
+        mock_db.return_value = mock_session
+        
+        response = client.post(
+            "/admin/movies",
+            cookies={"access_token": admin_token},
+            json=test_movie
+        )
+        
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == test_movie["title"]
+
+def test_create_movie_non_admin():
+    test_movie = get_test_movie()
+    user_token = create_access_token({"sub": "testuser"}, False)
+    
     response = client.post(
         "/admin/movies",
-        headers=headers,
-        json={
-            "title": "New Movie",
-            "showtime": (datetime.utcnow() + timedelta(days=1)).isoformat(),
-            "available_seats": 100
-        }
+        cookies={"access_token": user_token},
+        json=test_movie
     )
-    assert response.status_code == 200
-    assert response.json()["title"] == "New Movie"
-
-def test_get_movies(client, test_movie):
-    response = client.get("/movies")
-    assert response.status_code == 200
-    assert len(response.json()) >= 1
-    assert response.json()[0]["title"] == "Test Movie"
-
-def test_non_admin_cannot_create_movie(client, test_user):
-    headers = get_auth_headers(client, "testuser", "testpass")
-    response = client.post(
-        "/admin/movies",
-        headers=headers,
-        json={
-            "title": "New Movie",
-            "showtime": (datetime.utcnow() + timedelta(days=1)).isoformat(),
-            "available_seats": 100
-        }
-    )
+    
     assert response.status_code == 403
+    assert response.json()["detail"] == "Not authorized"
