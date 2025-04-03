@@ -49,6 +49,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+To enable test coverage reporting, install `pytest-cov`:
+
+```bash
+pip install pytest-cov
+```
+
 5. **Set up environment variables**
 
 Copy the example environment file and update it with your settings:
@@ -111,6 +117,7 @@ The API will be available at http://localhost:8000
 ├── .env               # Environment variables (not in version control)
 ├── .env.example       # Example environment variables
 ├── .gitignore         # Git ignore file
+├── LICENSE            # License file
 ├── pyproject.toml     # Project configuration
 ├── pytest.ini        # Pytest configuration
 └── requirements.txt   # Dependencies
