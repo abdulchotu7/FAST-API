@@ -28,7 +28,7 @@ def set_auth_cookie(response: Response, token: str) -> None:
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,  # Set to True in production with HTTPS
+        secure=True,  
         samesite="lax",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
@@ -64,7 +64,6 @@ def get_current_user(
     if user is None:
         raise credentials_exception
 
-    # Ensure admin status from token is applied
     user.is_admin = token_data.is_admin
     return user
 

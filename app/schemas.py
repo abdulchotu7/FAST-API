@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# Token schemas for OAuth2
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -11,7 +10,6 @@ class TokenData(BaseModel):
     username: Optional[str] = None
     is_admin: Optional[bool] = None
 
-# User schemas
 class UserBase(BaseModel):
     username: str
 
@@ -32,7 +30,6 @@ class CurrentUser(BaseModel):
     class Config:
         orm_mode = True
 
-# Movie schemas
 class MovieBase(BaseModel):
     title: str
     showtime: datetime
@@ -47,7 +44,6 @@ class Movie(MovieBase):
     class Config:
         orm_mode = True
 
-# Booking schemas
 class BookingBase(BaseModel):
     seats: int
 
@@ -63,7 +59,6 @@ class Booking(BookingBase):
     class Config:
         orm_mode = True
 
-# For OAuth2 password flow
 class UserLogin(BaseModel):
     username: str
     password: str

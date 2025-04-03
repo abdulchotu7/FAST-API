@@ -18,7 +18,7 @@ def get_admin_token():
 
 def test_get_movies():
     test_movie = get_test_movie()
-    test_movie["id"] = 1  # Add id for response
+    test_movie["id"] = 1  
     user_token = create_access_token({"sub": "testuser"}, False)
     
     with patch('app.database.get_db') as mock_db:

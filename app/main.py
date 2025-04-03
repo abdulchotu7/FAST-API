@@ -8,14 +8,12 @@ from sqlalchemy import select, func
 
 app = FastAPI()
 
-# Create tables at startup
-@app.on_event("startup")
 async def startup_event():
     Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}  # Changed to match the test
+    return {"Hello": "World"}  
 
 # Auth routes
 @app.post("/auth/signup", response_model=schemas.User)
@@ -51,7 +49,6 @@ async def login(
         user_is_admin=user.is_admin
     )
     
-    # Set the cookie
     auth.set_auth_cookie(response, access_token)
     
     return {
@@ -64,7 +61,6 @@ async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"message": "Successfully logged out"}
 
-# Admin routes
 @app.post("/admin/movies", response_model=schemas.Movie)
 def create_movie(
     movie: schemas.MovieCreate,
@@ -72,7 +68,6 @@ def create_movie(
     db: Session = Depends(get_db)
 ):
     try:
-        # Convert Pydantic model to dict and create Movie instance
         movie_data = movie.dict()
         db_movie = models.Movie(
             title=movie_data["title"],
@@ -80,7 +75,6 @@ def create_movie(
             available_seats=movie_data["available_seats"]
         )
         
-        # Add to session and commit
         db.add(db_movie)
         db.commit()
         db.refresh(db_movie)
@@ -141,7 +135,6 @@ def view_history(
 ):
     return db.query(models.Booking).filter(models.Booking.user_id == current_user.id).all()
 
-# Debug endpoint to check current user's details
 @app.get("/auth/me", response_model=schemas.User)
 def get_current_user_info(current_user: models.User = Depends(auth.get_current_user)):
     return current_user

@@ -15,7 +15,7 @@ class User(Base):
 class Movie(Base):
     __tablename__ = "movies"
 
-    id = Column(Integer, primary_key=True, index=True)  # Remove the Sequence here
+    id = Column(Integer, primary_key=True, index=True) 
     title = Column(String, index=True)
     showtime = Column(DateTime)
     available_seats = Column(Integer)

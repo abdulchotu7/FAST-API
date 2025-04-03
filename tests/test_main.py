@@ -6,7 +6,7 @@ client = TestClient(app)
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"Hello": "World"}  # Match the actual response in main.py
+    assert response.json() == {"Hello": "World"}
 
 def test_docs():
     response = client.get("/docs")
